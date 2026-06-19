@@ -18,3 +18,8 @@ def list_files(directory: str) -> str:
         return f"Files in {directory}: {', '.join(files)}"
     except Exception as e:
         return f"Error listing directory {e}"
+
+
+def get_cwd() -> str:
+    """Get the current working directory path."""
+    return os.getcwd()

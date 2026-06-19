@@ -19,7 +19,7 @@ class LlamaChat:
         self.tool_list = [read_files, list_files]
 
     def get_response(self, messages):
-        self.messages.extend(messages)
+        self.messages = messages
 
         print("\033[2m[Qwen thinking...] \033[0m", end="\r")
 
