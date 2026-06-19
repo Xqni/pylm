@@ -15,9 +15,7 @@ def main():
       break
 
     messages.append({"role": "user", "content": user_input})
-    response = chat.get_response(messages)
-    messages.append({"role": "assistant", "content": response})
-    # print(f"Llama: {response}")
+    chat.get_response(messages)
 
 if __name__ == "__main__":
   main()
