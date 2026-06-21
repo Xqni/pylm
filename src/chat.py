@@ -3,7 +3,7 @@ from .config import (
     OLLAMA_MODEL
 )
 
-from .tools import read_files, list_files, get_cwd
+from .tools import read_file, list_files, get_cwd, python_code_parser
 
 
 class LlamaChat:
@@ -12,10 +12,13 @@ class LlamaChat:
         self.messages = []
 
         self.available_tools = {
-            "read_files": read_files,
+            "read_file": read_file,
             "list_files": list_files,
             "get_cwd": get_cwd,
+            "python_code_parser": python_code_parser
         }
+
+        self.tool_list = list(self.available_tools.values())
 
     def get_response(self, messages):
         # Initialize messages
@@ -29,7 +32,7 @@ class LlamaChat:
             response = chat(
                 model=self.model,
                 messages=self.messages,
-                tools=list(self.available_tools.values()),
+                tools=self.tool_list,
                 stream=True,  # makes this a generator
             )
 
@@ -39,13 +42,13 @@ class LlamaChat:
             tool_calls = []
 
             # Flags for printing
-            thinking_started = False
             content_started = False
+            thinking_started = False
 
             # streaming the response in the terminal
             for chunk in response:
                 if chunk.message.thinking:
-                    if not thinking:
+                    if not thinking_started:
                         # Prefix for the thinking chunks, printed once
                         print("\033[2mQwen thinking: \033[0m", end="")
                         thinking_started = True
@@ -54,7 +57,7 @@ class LlamaChat:
                     print(
                         f"\033[2m{chunk.message.thinking}\033[0m", end="", flush=True)
                 if chunk.message.content:
-                    if not content_started and thinking_started:
+                    if not content_started:
                         # Prefix for actual message chunks, only printed once
                         print("\nQwen: ", end="")
                         content_started = True
@@ -73,28 +76,46 @@ class LlamaChat:
 
             # Only if the agent called tools
             if tool_calls:
-                for tool in tool_calls:
-                    # Extract the details
-                    tool_name = tool.function.name
-                    arguments = tool.function.arguments
-
-                    print(
-                        f"\n\033[2mSystem: AI is running\ntool: \"{tool_name}\"\narguments: {arguments}\033[0m\n")
-
-                    # If the function is in the available list of tools, call the function (or tool)
-                    if function_to_call := self.available_tools.get(tool_name):
-                        result = function_to_call(**arguments)
-
-                        # Add the result to the history for final response and tracking
-                        self.messages.append({
-                            "role": "tool",
-                            "content": str(result),
-                            "name": tool_name
-                        })
+                self.call_tools(tool_calls)
 
                 # Agent loops automatically here if the tool calling has not finished
 
-            # Agent never called any times or the tool calls have ended
+            # Agent never called any tools or the tool calls have ended
             else:
                 print()  # Newline before waiting for user input
                 break
+
+    def call_tools(self, tools_to_call):
+        for tool in tools_to_call:
+            # Extract the details
+            tool_name = tool.function.name
+            arguments = tool.function.arguments
+
+            print(
+                f"\n\033[2m[tool] {tool_name}({arguments})\033[0m\n")
+
+            try:
+                # If the function is in the available list of tools, call the function (or tool)
+                if function_to_call := self.available_tools.get(tool_name):
+                    result = function_to_call(**arguments)
+
+                    # Add the result to the history for final response and tracking
+                    self.messages.append({
+                        "role": "tool",
+                        "content": str(result),
+                        "name": tool_name
+                    })
+                else:
+                    tool_doesnt_exist = f"Error calling {tool_name} with {arguments}. Check the tool against available tools and call the correct tool with correct arguments."
+                    self.messages.append({
+                        "role": "tool",
+                        "content": str(tool_doesnt_exist),
+                        "name": tool_name
+                    })
+            except Exception as e:
+                error_calling_tool = f"Error calling {tool_name} with {arguments}. Error message: {e}"
+                self.messages.append({
+                    "role": "tool",
+                    "content": str(error_calling_tool),
+                    "name": tool_name
+                })
