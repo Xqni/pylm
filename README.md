@@ -1,5 +1,7 @@
 # Pylm
 
+> **Website**: [pylm.vercel.app](https://pylm.vercel.app/)
+
 A CLI chatbot powered by [Ollama](https://ollama.ai) that gives an LLM agent autonomous access to tools — file system, web search, bash, and more.
 
 Built with Qwen3:8b, but works with any Ollama-hosted model.
