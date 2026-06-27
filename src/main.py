@@ -1,5 +1,4 @@
 from src.chat import LlamaChat
-import unittest
 
 
 def main():

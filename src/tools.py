@@ -51,7 +51,7 @@ def python_code_parser(source_code: str) -> str:
 def read_specific_lines(filepath: str, start: int, end: int) -> list:
     """Read the specific lines of a text file."""
     if not os.path.exists(filepath):
-        return f"Error: {filepath} doesn't exist. Check whether you are passing in the curernt filepath. Use list_files() to the list of files in the directory."
+        return f"Error: {filepath} doesn't exist. Check whether you are passing in the current filepath. Use list_files() to the list of files in the directory."
     elif not os.path.isfile(filepath):
         return f"Error: {filepath} is not a file. It may be a directory, use list_files() to see its contents."
     try:
