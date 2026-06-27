@@ -4,7 +4,7 @@ build-backend="setuptools.build_meta"
 
 [project]
 name = "llama-python"
-version = "0.2.0"
+version = "0.2.1"
 description = "A CLI chatbot (code roaster) using Qwen3:8b LLM"
 readme = "README.md"
 authors=[{name="Damian", email="example@me.com"}]
